@@ -184,7 +184,7 @@ async function Comparison() {
     } catch (error) {
         console.log(error);
     }
-}
+} 
 //Comparison();
 
 //Logical Query Operators

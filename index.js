@@ -1,46 +1,7 @@
-const express = require('express');
-const mongooseConnect = require('mongoose');
+// const express = require('express');
 const mongodb = require('mongodb');
-const validator = require('validator');
-mongooseConnect.connect("mongodb://localhost:27017/Mongo_Class", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then((data) => {
-    //console.log(`Successfully connected.`);
-}).catch((error) => {
-    console.log(`Failed to connect database..!! `, error);
-});
-const classsSchema = new mongooseConnect.Schema({
-    name: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, unique: true, trim: true, minlength: [10, "minimum 10 digit."], maxlength: [10, "maximum 10 digit."] },
-    email: {
-        type: String, required: true, unique: true, trim: true,
-        validate(value) {
-            if (!validator.isEmail(value)) {
-                throw new Error('email is invalid');
-            }
-        }
-    },
-    age: {
-        type: Number, required: true, trim: true,
-        validate(value) {
-            if (value < 18) {
-                throw new Error('minimum age is 18');
-            }
-        }
-        // validate: {
-        //     validator: function (value) {
-        //         return value.length < 18
-        //     },
-        //     message: "minimum age is 18"
-        // }
-    },
-    active: { type: Boolean, required: true, default: true },
-    social_acc: { type: [], required: false },
-    created_at: { type: Date, required: true, default: Date.now() },
-    updated_at: { type: Date, required: false, default: null },
-});
-const ClassModel = mongooseConnect.model('classses', classsSchema);
+const ClassModel = require('./classmodel');
+
 /////////////////////////////////////////////////////////////////
 
 async function Insert() {
@@ -304,7 +265,6 @@ async function MongoAggregate() {
 
 async function CollectionJoin() {
     try {
-
         let data = await ClassModel.aggregate([
             {
                 $addFields: {
@@ -318,10 +278,25 @@ async function CollectionJoin() {
                     from: "address",
                     localField: "_id",
                     foreignField: "userid",
-                    as: "address"
+                    as: "address_dtl"
+                }
+            },
+            { $unwind: '$address_dtl' },
+            {
+                "$project": {
+                    "_id": 1,
+                    "name": 1,
+                    "phone": 1,
+                    "email": 1,
+                    "age": 1,
+                    "active": 1,
+                    "social_acc": 1,
+                    "address_dtl.address": 1,
+                    "address_dtl.district": 1,
+                    "address_dtl.country": 1
                 }
             }
-        ]);
+        ]).exec();
         console.log(data);
     } catch (error) {
         console.log(error);

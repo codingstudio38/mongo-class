@@ -1,4 +1,4 @@
-// const express = require('express');
+const express = require('express');
 const mongodb = require('mongodb');
 const ClassModel = require('./classmodel');
 
@@ -261,8 +261,6 @@ async function MongoAggregate() {
 //MongoAggregate()
 
 
-
-
 async function CollectionJoin() {
     try {
         let data = await ClassModel.aggregate([
@@ -291,11 +289,13 @@ async function CollectionJoin() {
                     "age": 1,
                     "active": 1,
                     "social_acc": 1,
+                    "address_dtl._id": 1,
                     "address_dtl.address": 1,
                     "address_dtl.district": 1,
                     "address_dtl.country": 1
                 }
             }
+            //,{ $match: { "address_dtl._id": new mongodb.ObjectId("637a4af1cb803f976f93db24") } }
         ]).exec();
         console.log(data);
     } catch (error) {
@@ -303,6 +303,33 @@ async function CollectionJoin() {
     }
 }
 //CollectionJoin();
+
+
+async function modoperator() {
+    //Then, the following query selects those documents in the inventory collection where value of the qty field modulo 10 equals 0:
+    try {
+        let data = await ClassModel.find({ age: { $mod: [10, 0] } });
+        console.log(data);
+    } catch (error) {
+        console.log(error);
+    }
+}
+// modoperator();
+
+
+async function textoperator() {
+    //$text performs a text search on the content of the fields indexed with a text index. A $text expression has the following syntax:
+    try {
+        let data = await ClassModel.find({ $text: { $search: "mongo", $caseSensitive: false } });
+        console.log(data);
+    } catch (error) {
+        console.log(error);
+    }
+}
+//textoperator();
+
+
+
 
 
 
